@@ -86,7 +86,7 @@ class ELO(AbstractAlgo):
 
             t += 1
 
-        return np.argsort(team_scores)[::-1], t, None
+        return np.argsort(team_scores)[::-1], t
 
     def generate_plots(self):
         return super().generate_plots()
