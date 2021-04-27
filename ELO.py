@@ -56,10 +56,11 @@ class ELO(AbstractAlgo):
 
         sim = JudgingSimulator(true_q, n_judges, var, var)
 
-        steps = 10
+        last_ranking = ([i for i in range(n_teams)])[:top_n]
 
+        n = 0
         t = 0
-        while t < steps:
+        while True:
             for j in range(n_judges):                
                 t1 = prev_teams[j]
 
@@ -76,6 +77,12 @@ class ELO(AbstractAlgo):
                 team_scores[winner], team_scores[loser] = EloRating(team_scores[winner], team_scores[loser], self.K, self.d)
                 
                 prev_teams[j] = t2
+                n += 1
+
+            new_ranking = (np.argsort(team_scores)[::-1])[:top_n]
+            if (new_ranking == last_ranking).all() and t > n_teams * math.log2(n_teams):
+                break
+            last_ranking = [i for i in new_ranking]
 
             t += 1
 
