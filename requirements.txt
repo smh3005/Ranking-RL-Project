@@ -3,3 +3,4 @@ pandas
 numpy
 
 trueskill==0.4.5
+scipy==1.6.3
