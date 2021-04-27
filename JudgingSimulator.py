@@ -9,9 +9,9 @@ class JudgingSimulator:
         self.n_teams = len(expected_team_values)
         self.team_value_shapes = [self.get_shape_params(val, opinion_var)
                                 for val in expected_team_values]
-        self.judge_opinions = [self._get_judge_opinions() for _ in range(self.n_judges)]
+        self.judges_opinions = [self._get_judges_opinions() for _ in range(self.n_judges)]
 
-    def _get_judge_opinions(self):
+    def _get_judges_opinions(self):
       # sample a judge's opinion of each team
       return [Beta(*value_shape) for value_shape in self.team_value_shapes]
 
@@ -25,7 +25,7 @@ class JudgingSimulator:
 
     def sample_evaluations(self, judge, teams=None):
         teams = teams or np.arange(self.n_teams)
-        opinions = [self.judge_opinions[judge][team] for team in teams]
+        opinions = [self.judges_opinions[judge][team] for team in teams]
         eval_shapes = [self.get_shape_params(opinion, self.eval_var) for opinion in opinions]
         evals = [Beta(*eval_shape) for eval_shape in eval_shapes]
         return evals
