@@ -1,2 +1,5 @@
 # Ranking Hackathon Projects using Reinforcement Learning
-Ally!!!! Please fill this in 😇. -Seth
+
+### How to run
+pip install -r requirements.txt
+python main.py
