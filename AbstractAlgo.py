@@ -7,19 +7,19 @@ class AbstractAlgo(ABC):
         pass
     
     @abstractmethod
-    def rank_teams(self, n_teams, n_judges, true_q, c, var):
+    def rank_teams(self, n_teams, n_judges, true_q, c, var, top_n):
         pass
 
     @abstractmethod
     def generate_plots(self):
         pass
 
-    def run_experiment(self, n_teams, n_judges, true_q, c, var, n_episodes):
+    def run_experiment(self, n_teams, n_judges, true_q, c, var, n_episodes, top_n):
         print(self)
         ranks = []
         times = []
         for n in range(n_episodes):
-            rank, time, visit = self.rank_teams(n_teams, n_judges, true_q, c, var)
+            rank, time, visit = self.rank_teams(n_teams, n_judges, true_q, c, var, top_n)
             ranks.append(rank)
             times.append(time)
             
