@@ -1,0 +1,5 @@
+matplotlib
+pandas
+numpy
+
+trueskill==0.4.5
