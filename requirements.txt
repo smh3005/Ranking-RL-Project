@@ -5,3 +5,7 @@ numpy
 trueskill==0.4.5
 scipy==1.6.3
 rbo==0.1.2
+
+## Developing
+autopep8==1.5.6 # formatter
+pylint==2.8.2   # linter

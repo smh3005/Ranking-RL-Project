@@ -1,11 +1,11 @@
-from UCB_PREV1 import UCB_PREV1
-from UCB_PREV2 import UCB_PREV2
-from UCB_PREV3 import UCB_PREV3
+import numpy as np
+
 from EGREEDY_PREV1 import EGREEDY_PREV1
 from EGREEDY_PREV2 import EGREEDY_PREV2
 from EGREEDY_PREV3 import EGREEDY_PREV3
-from ELO import ELO
-import numpy as np
+from UCB_PREV1 import UCB_PREV1
+from UCB_PREV2 import UCB_PREV2
+from UCB_PREV3 import UCB_PREV3
 
 true_q_15 = np.linspace(0.05, 0.95, 15)
 

@@ -1,15 +1,13 @@
-from AbstractAlgo import AbstractAlgo
-from JudgingSimulator import JudgingSimulator
-from scipy.stats import rankdata
 import math
-import numpy as np
 import random
 from collections import defaultdict
-from collections import Counter
 from queue import Queue
-import rbo
-from copy import deepcopy
-import matplotlib.pyplot as plt
+
+import numpy as np
+from scipy.stats import rankdata
+
+from AbstractAlgo import AbstractAlgo
+from JudgingSimulator import JudgingSimulator
 
 
 class UCB(AbstractAlgo):
@@ -17,7 +15,7 @@ class UCB(AbstractAlgo):
     def __init__(self):
         super(UCB).__init__()
 
-    ''' UCB  
+    ''' UCB
     input: q-value per team (Q), visits per team (N), number of teams (n_teams),
     judge's previous 2 teams (prev2), exploration constant (c), time (t)
     output: a team to visit (curr)`
@@ -103,9 +101,6 @@ class UCB(AbstractAlgo):
             judge_previous[j][0] = judge_previous[j][1]
             judge_previous[j][1] = judge_current[j]
             judge_queue.put(j)  # assign curr to prev
-
-    def generate_plots(self):
-        return super().generate_plots()
 
     def __str__(self):
         return "***************** UCB Algorithm *****************"

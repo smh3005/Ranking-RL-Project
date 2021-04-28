@@ -1,5 +1,5 @@
-from numpy.random import beta as Beta
 import numpy as np
+from numpy.random import beta as Beta
 
 
 class JudgingSimulator:

@@ -1,11 +1,13 @@
+import math
+from random import random
+
+import numpy as np
+from numpy.random import shuffle
+from recordtype import recordtype
+
+import crowd_bt
 from AbstractAlgo import AbstractAlgo
 from JudgingSimulator import JudgingSimulator
-import crowd_bt
-from numpy.random import shuffle
-import numpy as np
-from random import random
-from recordtype import recordtype
-import math
 
 Team = recordtype("Team", "mu sigma_sq id")
 Judge = recordtype("Judge", "alpha beta prev next")
@@ -52,9 +54,6 @@ def perform_vote(judge, next_won):
 
 
 class Gavel(AbstractAlgo):
-    def __init__(self):
-        super().__init__()
-
     def rank_teams(self, n_teams, n_judges, true_q, c, var, top_n):
         start_mu = 20
         start_sig = 1
@@ -87,9 +86,6 @@ class Gavel(AbstractAlgo):
             t += 1
 
         return new_ranking, t
-
-    def generate_plots(self):
-        return super().generate_plots()
 
     def __str__(self):
         return "***************** Gavel Algorithm *****************"

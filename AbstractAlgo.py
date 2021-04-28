@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from collections import Counter
+
 import numpy as np
-from collections import defaultdict, Counter
 
 
 class AbstractAlgo(ABC):
@@ -11,7 +12,6 @@ class AbstractAlgo(ABC):
     def rank_teams(self, n_teams, n_judges, true_q, c, var, top_n):
         pass
 
-    @abstractmethod
     def generate_plots(self, kwargs):
         pass
 
@@ -19,7 +19,7 @@ class AbstractAlgo(ABC):
         print(self)
         ranks = []
         times = []
-        for n in range(n_episodes):
+        for _ in range(n_episodes):
             rank, time = self.rank_teams(
                 n_teams, n_judges, true_q, c, var, top_n)
             ranks.append(rank)

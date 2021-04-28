@@ -1,15 +1,13 @@
-from AbstractAlgo import AbstractAlgo
-from JudgingSimulator import JudgingSimulator
-from scipy.stats import rankdata
 import math
-import numpy as np
 import random
 from collections import defaultdict
-from collections import Counter
 from queue import Queue
-import rbo
-from copy import deepcopy
-import matplotlib.pyplot as plt
+
+import numpy as np
+from scipy.stats import rankdata
+
+from AbstractAlgo import AbstractAlgo
+from JudgingSimulator import JudgingSimulator
 
 
 class EGREEDY_PREV1(AbstractAlgo):
@@ -17,13 +15,13 @@ class EGREEDY_PREV1(AbstractAlgo):
     def __init__(self):
         super(EGREEDY_PREV1).__init__()
 
-    ''' EGREEDY  
+    ''' EGREEDY
     input: q-value per team (Q), visits per team (N), number of teams (n_teams),
     judge's previous team (prev), exploration constant (c), time (t)
     output: a team to visit (curr)`
     '''
 
-    def egreedy(self, Q, n_teams, prev, c, t):
+    def egreedy(self, Q, n_teams, prev, c):
         if random.random() > c:  # choose highest scoring team with probability 1-epsilon
             curr = np.random.choice(np.flatnonzero(
                 np.array(Q) == np.array(Q).max()))
@@ -95,7 +93,7 @@ class EGREEDY_PREV1(AbstractAlgo):
             t += 1  # increment time
             # dispatch a judge to visit a team
             judge_current[j] = self.egreedy(
-                Q, n_teams, judge_previous[j], c, t)
+                Q, n_teams, judge_previous[j], c)
             # simulate the judge's decision
             winner = sim.judge(0, judge_current[j], judge_previous[j])
             # update the team's q-values
@@ -106,8 +104,6 @@ class EGREEDY_PREV1(AbstractAlgo):
             judge_previous[j] = judge_current[j]
             judge_queue.put(j)  # assign curr to prev
 
-    def generate_plots(self):
-        return super().generate_plots()
 
     def __str__(self):
         return "***************** EGREEDY PREV 1 Algorithm *****************"

@@ -1,11 +1,11 @@
-from AbstractAlgo import AbstractAlgo
-from JudgingSimulator import JudgingSimulator
-import numpy as np
-import random
-
 # https://www.geeksforgeeks.org/elo-rating-algorithm/
 # Python 3 program for Elo Rating
 import math
+
+import numpy as np
+
+from AbstractAlgo import AbstractAlgo
+from JudgingSimulator import JudgingSimulator
 
 # Function to calculate the Probability
 
@@ -30,7 +30,7 @@ def EloRating(Ra, Rb, K, d):
 
     # Case -1 When Player A wins
     # Updating the Elo Ratings
-    if (d == 1):
+    if d == 1:
         Ra = Ra + K * (1 - Pa)
         Rb = Rb + K * (0 - Pb)
 
@@ -91,9 +91,6 @@ class ELO(AbstractAlgo):
             t += 1
 
         return np.argsort(team_scores)[::-1], t
-
-    def generate_plots(self):
-        return super().generate_plots()
 
     def __str__(self):
         return "***************** ELO Algorithm *****************"

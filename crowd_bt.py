@@ -1,11 +1,5 @@
-from numpy import (
-    exp,
-    log,
-)
-from scipy.special import (
-    betaln,
-    psi,
-)
+from numpy import exp, log
+from scipy.special import betaln, psi
 
 # See this paper for more information:
 # http://people.stern.nyu.edu/xchen3/images/crowd_pairwise.pdf
