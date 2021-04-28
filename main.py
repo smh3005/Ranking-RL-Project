@@ -6,7 +6,7 @@ from EGREEDY_PREV3 import EGREEDY_PREV3
 from UCB_PREV1 import UCB_PREV1
 from UCB_PREV2 import UCB_PREV2
 from UCB_PREV3 import UCB_PREV3
-
+from ELO import ELO
 true_q_15 = np.linspace(0.05, 0.95, 15)
 
 # Run Tests
@@ -70,11 +70,16 @@ egreedy3.run_experiment(n_teams=15,
                         top_n=5
                         )
 
-# elo = ELO()
-# elo.run_experiment(n_teams=5,
-#                    n_judges=1,
-#                    true_q=[0.1,0.3,0.5,0.7,0.9],
-#                    n_episodes=200,
-#                    c=0.1,
-#                    var=0.001
-#                   )
+elo = ELO()
+elo.run_experiment(n_teams=5,
+                   n_judges=1,
+                   true_q=[0.1,0.3,0.5,0.7,0.9],
+                   n_episodes=200,
+                   c=0.1,
+                   var=0.001,
+                   top_n=5
+                  )
+
+import matplotlib.pyplot as plt
+plt.legend()
+plt.show()
