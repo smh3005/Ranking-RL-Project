@@ -17,7 +17,11 @@ class AbstractAlgo(ABC):
         raise NotImplementedError
 
     def generate_plots(self, kwargs):
-        pass
+        xs = np.arange(kwargs['nplaces']) + 1
+        plt.xticks(xs)
+        plt.plot(xs, kwargs['inclusions'], label=self.get_plot_name())
+        plt.xlabel('Place')
+        plt.ylabel('Inclusion')
 
     def run_experiment(self, n_teams, n_judges, true_q, c, var, n_episodes, top_n):
         print(self)
