@@ -7,8 +7,6 @@ import numpy as np
 from scipy.stats import rankdata
 
 from AbstractAlgo import AbstractAlgo
-from JudgingSimulator import JudgingSimulator
-
 
 
 class EpsilonGreedy(AbstractAlgo):
@@ -18,9 +16,16 @@ class EpsilonGreedy(AbstractAlgo):
     judge's previous 3 teams (prev3), exploration constant (c), time (t)
     output: a team to visit (curr)`
     '''
+    def __init__(self, sim, epsilon):
+        self._epsilon = epsilon
+        super().__init__(sim)
 
-    def egreedy(self, Q, n_teams, prev3, c):
-        if random.random() > c:  # choose highest scoring team with probability 1-epsilon
+    @property
+    def epsilon(self):
+        return self._epsilon
+
+    def egreedy(self, Q, n_teams, prev3):
+        if random.random() > self.epsilon:  # choose highest scoring team with probability 1-epsilon
             curr = np.random.choice(np.flatnonzero(
                 np.array(Q) == np.array(Q).max()))
             i = 1
@@ -69,32 +74,32 @@ class EpsilonGreedy(AbstractAlgo):
         else:
             return False
 
-    def rank_teams(self, n_teams, n_judges, true_q, c, var, top_n):
-        self.c = c
+    def rank_teams(self, top_n):
+        """
+        np.array([.5, .3, .1]).argsort()[::-1] -> array([0, 1, 2])
+        """
         # intialize q-values (e.g. q(·)=0 for all teams)
-        Q = [1 for _ in range(n_teams)]
+        Q = [1 for _ in range(self.sim.n_teams)]
         # initialize number of visits (e.g. n(·)=0 for all teams)
-        N = [0 for _ in range(n_teams)]
+        N = [0 for _ in range(self.sim.n_teams)]
         t = 0  # initialize time (e.g. t=0)
-        sim = JudgingSimulator(true_q, n_judges, var,
-                               var)  # initialize simulator
 
         judge_current = defaultdict(int)
         judge_previous = defaultdict(list)
 
         judge_queue = Queue()
-        for j in range(n_judges):
+        for j in range(self.sim.n_judges):
             judge_queue.put(j)
-            judge_previous[j] = [None, None, random.randint(0, n_teams-1)]
+            judge_previous[j] = [None, None, random.randint(0, self.sim.n_teams-1)]
 
         while True:  # WHILE q-values haven't converged
             j = judge_queue.get()
             t += 1  # increment time
             # dispatch a judge to visit a team
             judge_current[j] = self.egreedy(
-                Q, n_teams, judge_previous[j], c)
+                Q, self.sim.n_teams, judge_previous[j])
             # simulate the judge's decision
-            winner = sim.judge(0, judge_current[j], judge_previous[j][2])
+            winner = self.sim.judge(0, judge_current[j], judge_previous[j][2])
             # update the team's q-values
             done = self.update(
                 Q, N, judge_current[j], judge_previous[j][2], winner, t, top_n)
@@ -106,7 +111,7 @@ class EpsilonGreedy(AbstractAlgo):
             judge_queue.put(j)  # assign curr to prev
 
     def get_plot_name(self):
-        return f'$\\varepsilon$-greedy ($\\varepsilon={self.c}$)'
+        return f'$\\varepsilon$-greedy ($\\varepsilon={self.epsilon}$)'
 
     def __str__(self):
         return "***************** EGREEDY PREV 3 Algorithm *****************"

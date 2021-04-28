@@ -7,6 +7,7 @@ class JudgingSimulator:
     def __init__(self, expected_team_values, n_judges, opinion_var=0.02, eval_var=0.02):
         self.n_judges = n_judges
         self.eval_var = eval_var
+        self.true_q = expected_team_values
         self.n_teams = len(expected_team_values)
         self.team_value_shapes = [self.get_shape_params(val, opinion_var)
                                   for val in expected_team_values]

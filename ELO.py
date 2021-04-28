@@ -5,10 +5,6 @@ import math
 import numpy as np
 
 from AbstractAlgo import AbstractAlgo
-from JudgingSimulator import JudgingSimulator
-
-# Function to calculate the Probability
-
 
 def Probability(rating1, rating2):
     return 1.0 * 1.0 / (1 + 1.0 * math.pow(10, 1.0 * (rating1 - rating2) / 400))
@@ -47,34 +43,31 @@ def EloRating(Ra, Rb, K, d):
 
 
 class ELO(AbstractAlgo):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, sim, K=30, d=1):
+        super().__init__(sim)
+        self.K = K
+        self.d = d
 
-        self.K = 30
-        self.d = 1
+    def rank_teams(self, top_n):
+        prev_teams = [i for i in range(self.sim.n_judges)]
+        team_scores = [1000 for _ in range(self.sim.n_teams)]
 
-    def rank_teams(self, n_teams, n_judges, true_q, c, var, top_n):
-        prev_teams = [i for i in range(n_judges)]
-        team_scores = [1000 for _ in range(n_teams)]
-
-        sim = JudgingSimulator(true_q, n_judges, var, var)
-
-        last_ranking = ([i for i in range(n_teams)])[:top_n]
+        last_ranking = ([i for i in range(self.sim.n_teams)])[:top_n]
 
         n = 0
         t = 0
         while True:
-            for j in range(n_judges):
+            for j in range(self.sim.n_judges):
                 t1 = prev_teams[j]
 
                 t2 = None
                 closest_dif = 9999  # simulated inf
-                for team in range(n_teams):
+                for team in range(self.sim.n_teams):
                     if t1 != team and abs(team_scores[t1] - team_scores[team]) < closest_dif:
                         closest_dif = abs(team_scores[t1] - team_scores[team])
                         t2 = team
 
-                winner = sim.judge(j, t1, t2)
+                winner = self.sim.judge(j, t1, t2)
                 loser = t2 if winner == t1 else t1
 
                 team_scores[winner], team_scores[loser] = EloRating(
@@ -84,7 +77,7 @@ class ELO(AbstractAlgo):
                 n += 1
 
             new_ranking = (np.argsort(team_scores)[::-1])[:top_n]
-            if (new_ranking == last_ranking).all() and t > n_teams * math.log2(n_teams):
+            if (new_ranking == last_ranking).all() and t > self.sim.n_teams * math.log2(self.sim.n_teams):
                 break
             last_ranking = [i for i in new_ranking]
 

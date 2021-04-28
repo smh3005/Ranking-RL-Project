@@ -7,7 +7,6 @@ import numpy as np
 from scipy.stats import rankdata
 
 from AbstractAlgo import AbstractAlgo
-from JudgingSimulator import JudgingSimulator
 
 
 class UCB(AbstractAlgo):
@@ -17,14 +16,18 @@ class UCB(AbstractAlgo):
     output: a team to visit (curr)`
     '''
 
-    def ucb(self, Q, N, n_teams, prev3, c, t):
+    def __init__(self, sim, c):
+        self.c = c
+        super().__init__(sim)
+
+    def ucb(self, Q, N, n_teams, prev3, t):
         # calculate UCB score for each team
         ucb_scores = []
         for a in range(n_teams):
             if N[a] == 0:
                 ucb_scores.append(float('inf'))
             else:
-                ucb_scores.append(Q[a] + c * np.sqrt(np.log(2*t)/N[a]))
+                ucb_scores.append(Q[a] + self.c * np.sqrt(np.log(2*t)/N[a]))
         # choose the team with the highest UCB score
         curr = np.argmax(ucb_scores)
         # make sure that curr != prev
@@ -64,31 +67,30 @@ class UCB(AbstractAlgo):
         else:
             return False
 
-    def rank_teams(self, n_teams, n_judges, true_q, c, var, top_n):
-        self.c = c
+    def rank_teams(self, top_n):
         # intialize q-values (e.g. q(·)=0 for all teams)
-        Q = [0 for _ in range(n_teams)]
+        Q = [0 for _ in range(self.sim.n_teams)]
         # initialize number of visits (e.g. n(·)=0 for all teams)
-        N = [0 for _ in range(n_teams)]
+        N = [0 for _ in range(self.sim.n_teams)]
         t = 0  # initialize time (e.g. t=0)
-        sim = JudgingSimulator(true_q, n_judges, var,
-                               var)  # initialize simulator
 
         judge_current = defaultdict(int)
         judge_previous = defaultdict(list)
 
         judge_queue = Queue()
-        for j in range(n_judges):
+        for j in range(self.sim.n_judges):
             judge_queue.put(j)
-            judge_previous[j] = [None, None, random.randint(0, n_teams-1)]
+            judge_previous[j] = [None, None,
+                                 random.randint(0, self.sim.n_teams-1)]
 
         while True:  # WHILE q-values haven't converged
             j = judge_queue.get()
             t += 1  # increment time
             # dispatch a judge to visit a team
-            judge_current[j] = self.ucb(Q, N, n_teams, judge_previous[j], c, t)
+            judge_current[j] = self.ucb(
+                Q, N, self.sim.n_teams, judge_previous[j], t)
             # simulate the judge's decision
-            winner = sim.judge(0, judge_current[j], judge_previous[j][2])
+            winner = self.sim.judge(0, judge_current[j], judge_previous[j][2])
             # update the team's scores
             # update the team's q-values
             done = self.update(
