@@ -34,47 +34,30 @@ class AbstractAlgo(ABC):
         print(np.mean(times))
         print()
 
-        ''' ACCURACY METRICS '''
-        print('Accuracy: ')
-        c1 = Counter(tuple(x)[0] for x in iter(ranks))
-        first = c1[tuple(np.argsort(true_q))[::-1][0]]/n_episodes
-        print("first: " + str(first*100) + "%")
+        place_names = ['first', 'second', 'third', 'fourth', 'fifth']
+        nplaces = len(place_names)
 
-        c1 = Counter(tuple(x)[1] for x in iter(ranks))
-        second = c1[tuple(np.argsort(true_q))[::-1][1]]/n_episodes
-        print("second: " + str(second*100) + "%")
+        accuracies = np.empty(nplaces)
+        for i in range(nplaces):
+            c = Counter(tuple(x)[i] for x in iter(ranks))
+            accuracy = c[tuple(np.argsort(true_q))[::-1][i]] / n_episodes
+            accuracies[i] = accuracy
 
-        c1 = Counter(tuple(x)[2] for x in iter(ranks))
-        third = c1[tuple(np.argsort(true_q))[::-1][2]]/n_episodes
-        print("third: " + str(third*100) + "%")
 
-        c1 = Counter(tuple(x)[3] for x in iter(ranks))
-        fourth = c1[tuple(np.argsort(true_q))[::-1][3]]/n_episodes
-        print("fourth: " + str(fourth*100) + "%")
-
-        c1 = Counter(tuple(x)[4] for x in iter(ranks))
-        fifth = c1[tuple(np.argsort(true_q))[::-1][4]]/n_episodes
-        print("fifth: " + str(fifth*100) + "%")
-        print()
-
-        ''' INCLUSION METRICS '''
-        print('Inclusion in Top-5: ')
+        inclusions = np.empty(nplaces)
         c2 = Counter(tuple(x) for x in iter(ranks))
-        first = sum([c2[x] for x in c2 if np.argsort(
-            true_q)[::-1][0] in x[0:5]]) / n_episodes
-        print("first: " + str(first * 100) + "%")
-        second = sum([c2[x] for x in c2 if np.argsort(
-            true_q)[::-1][1] in x[0:5]]) / n_episodes
-        print("second: " + str(second * 100) + "%")
-        third = sum([c2[x] for x in c2 if np.argsort(
-            true_q)[::-1][2] in x[0:5]]) / n_episodes
-        print("third: " + str(third * 100) + "%")
-        fourth = sum([c2[x] for x in c2 if np.argsort(
-            true_q)[::-1][3] in x[0:5]]) / n_episodes
-        print("fourth: " + str(fourth * 100) + "%")
-        fifth = sum([c2[x] for x in c2 if np.argsort(
-            true_q)[::-1][4] in x[0:5]]) / n_episodes
-        print("fifth: " + str(fifth * 100) + "%")
+        for i in range(nplaces):
+            inclusion = sum([c2[x] for x in c2 if np.argsort(
+                true_q)[::-1][i] in x[0:5]]) / n_episodes
+            inclusions[i] = inclusion
+
+        print('Accuracy: ')
+        for place, accuracy in zip(place_names, accuracies):
+            print(f"{place}: {int(round(accuracy*100))}%")
+
+        print('Inclusion in Top-5: ')
+        for place, inclusion in zip(place_names, inclusions):
+            print(f"{place}: {int(round(inclusion*100))}%")
 
         self.generate_plots(locals())
 
