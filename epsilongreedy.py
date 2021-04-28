@@ -10,32 +10,27 @@ from AbstractAlgo import AbstractAlgo
 from JudgingSimulator import JudgingSimulator
 
 
-class UCB_PREV3(AbstractAlgo):
 
-    def __init__(self):
-        super(UCB_PREV3).__init__()
+class EpsilonGreedy(AbstractAlgo):
 
-    ''' UCB
+    ''' EGREEDY
     input: q-value per team (Q), visits per team (N), number of teams (n_teams),
     judge's previous 3 teams (prev3), exploration constant (c), time (t)
     output: a team to visit (curr)`
     '''
 
-    def ucb(self, Q, N, n_teams, prev3, c, t):
-        # calculate UCB score for each team
-        ucb_scores = []
-        for a in range(n_teams):
-            if N[a] == 0:
-                ucb_scores.append(float('inf'))
-            else:
-                ucb_scores.append(Q[a] + c * np.sqrt(np.log(2*t)/N[a]))
-        # choose the team with the highest UCB score
-        curr = np.argmax(ucb_scores)
-        # make sure that curr != prev
-        i = 2
-        while curr in prev3:
-            curr = np.argsort(ucb_scores)[-i]
-            i += 1
+    def egreedy(self, Q, n_teams, prev3, c):
+        if random.random() > c:  # choose highest scoring team with probability 1-epsilon
+            curr = np.random.choice(np.flatnonzero(
+                np.array(Q) == np.array(Q).max()))
+            i = 1
+            while curr in prev3:
+                curr = np.argsort(Q)[-i]
+                i += 1
+        else:  # choose random team with proability epsilon
+            curr = random.randint(0, n_teams-1)
+            while curr in prev3:  # make sure that cur != prev
+                curr = random.randint(0, n_teams-1)
         return curr
 
     ''' UPDATE
@@ -51,8 +46,14 @@ class UCB_PREV3(AbstractAlgo):
             R = 1
         else:
             R = 0
+
         curr_Q = Q[curr]  # get current team's q-value
         prev_Q = Q[prev]  # get previous team's q-value
+
+        if N[curr] == 1:
+            curr_Q = 0
+        if N[prev] == 1:
+            prev_Q = 0
 
         last_ranking = rankdata(Q[::-1], method='min')[:top_n]
 
@@ -69,8 +70,9 @@ class UCB_PREV3(AbstractAlgo):
             return False
 
     def rank_teams(self, n_teams, n_judges, true_q, c, var, top_n):
+        self.c = c
         # intialize q-values (e.g. q(·)=0 for all teams)
-        Q = [0 for _ in range(n_teams)]
+        Q = [1 for _ in range(n_teams)]
         # initialize number of visits (e.g. n(·)=0 for all teams)
         N = [0 for _ in range(n_teams)]
         t = 0  # initialize time (e.g. t=0)
@@ -89,10 +91,10 @@ class UCB_PREV3(AbstractAlgo):
             j = judge_queue.get()
             t += 1  # increment time
             # dispatch a judge to visit a team
-            judge_current[j] = self.ucb(Q, N, n_teams, judge_previous[j], c, t)
+            judge_current[j] = self.egreedy(
+                Q, n_teams, judge_previous[j], c)
             # simulate the judge's decision
             winner = sim.judge(0, judge_current[j], judge_previous[j][2])
-            # update the team's scores
             # update the team's q-values
             done = self.update(
                 Q, N, judge_current[j], judge_previous[j][2], winner, t, top_n)
@@ -104,7 +106,7 @@ class UCB_PREV3(AbstractAlgo):
             judge_queue.put(j)  # assign curr to prev
 
     def get_plot_name(self):
-        return 'UCB (prev 3)'
+        return f'$\\varepsilon$-greedy ($\\varepsilon={self.c}$)'
 
     def __str__(self):
-        return "***************** UCB PREV-3 Algorithm *****************"
+        return "***************** EGREEDY PREV 3 Algorithm *****************"
