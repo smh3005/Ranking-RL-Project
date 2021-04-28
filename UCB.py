@@ -102,5 +102,8 @@ class UCB(AbstractAlgo):
             judge_previous[j][1] = judge_current[j]
             judge_queue.put(j)  # assign curr to prev
 
+    def get_plot_name(self):
+        return 'UCB'
+
     def __str__(self):
         return "***************** UCB Algorithm *****************"

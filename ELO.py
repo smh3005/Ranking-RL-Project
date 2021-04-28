@@ -92,5 +92,8 @@ class ELO(AbstractAlgo):
 
         return np.argsort(team_scores)[::-1], t
 
+    def get_plot_name(self):
+        return 'ELO'
+
     def __str__(self):
         return "***************** ELO Algorithm *****************"

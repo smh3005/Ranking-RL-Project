@@ -10,7 +10,6 @@ from AbstractAlgo import AbstractAlgo
 from JudgingSimulator import JudgingSimulator
 
 
-
 class EGREEDY_PREV2(AbstractAlgo):
 
     def __init__(self):
@@ -105,6 +104,9 @@ class EGREEDY_PREV2(AbstractAlgo):
             judge_previous[j][0] = judge_previous[j][1]
             judge_previous[j][1] = judge_current[j]
             judge_queue.put(j)  # assign curr to prev
+
+    def get_plot_name(self):
+        return '$\\varepsilon$-greedy (prev 2)'
 
     def __str__(self):
         return "***************** EGREEDY PREV 2 Algorithm *****************"

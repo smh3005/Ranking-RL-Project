@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import Counter
-
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -11,6 +11,10 @@ class AbstractAlgo(ABC):
     @abstractmethod
     def rank_teams(self, n_teams, n_judges, true_q, c, var, top_n):
         pass
+
+    @abstractmethod
+    def get_plot_name(self):
+        raise NotImplementedError
 
     def generate_plots(self, kwargs):
         pass

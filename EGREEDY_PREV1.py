@@ -105,5 +105,8 @@ class EGREEDY_PREV1(AbstractAlgo):
             judge_queue.put(j)  # assign curr to prev
 
 
+    def get_plot_name(self):
+        return '$\\varepsilon$-greedy (prev 1)'
+
     def __str__(self):
         return "***************** EGREEDY PREV 1 Algorithm *****************"
