@@ -4,3 +4,4 @@ numpy
 
 trueskill==0.4.5
 scipy==1.6.3
+rbo==0.1.2
