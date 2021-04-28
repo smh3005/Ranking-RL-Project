@@ -10,8 +10,9 @@ import math
 Team = recordtype("Team", "mu sigma_sq id")
 Judge = recordtype("Judge", "alpha beta prev next")
 
+
 def choose_next(judge, teams):
-    shuffle(teams) # useful for argmax case as well in the case of ties
+    shuffle(teams)  # useful for argmax case as well in the case of ties
     if teams:
         if random() < crowd_bt.EPSILON:
             return teams[0]
@@ -25,6 +26,7 @@ def choose_next(judge, teams):
                 i.sigma_sq), teams)
     else:
         return None
+
 
 def perform_vote(judge, next_won):
     if next_won:
@@ -48,6 +50,7 @@ def perform_vote(judge, next_won):
     loser.mu = u_loser_mu
     loser.sigma_sq = u_loser_sigma_sq
 
+
 class Gavel(AbstractAlgo):
     def __init__(self):
         super().__init__()
@@ -65,9 +68,9 @@ class Gavel(AbstractAlgo):
         t = 0
         while True:
             team_scores = [t.mu for t in teams]
-            for j_id, j in enumerate(judges):                
+            for j_id, j in enumerate(judges):
                 j.next = choose_next(j, [t for t in teams if t != j.prev])
-                
+
                 winner = sim.judge(j_id, j.prev.id, j.next.id)
                 perform_vote(j, teams[winner] == j.next)
 
@@ -90,5 +93,3 @@ class Gavel(AbstractAlgo):
 
     def __str__(self):
         return "***************** Gavel Algorithm *****************"
-    
-    

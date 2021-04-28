@@ -2,16 +2,17 @@ from abc import ABC, abstractmethod
 import numpy as np
 from collections import defaultdict, Counter
 
+
 class AbstractAlgo(ABC):
     def __init__(self):
         pass
-    
+
     @abstractmethod
     def rank_teams(self, n_teams, n_judges, true_q, c, var, top_n):
         pass
 
     @abstractmethod
-    def generate_plots(self):
+    def generate_plots(self, kwargs):
         pass
 
     def run_experiment(self, n_teams, n_judges, true_q, c, var, n_episodes, top_n):
@@ -19,10 +20,11 @@ class AbstractAlgo(ABC):
         ranks = []
         times = []
         for n in range(n_episodes):
-            rank, time = self.rank_teams(n_teams, n_judges, true_q, c, var, top_n)
+            rank, time = self.rank_teams(
+                n_teams, n_judges, true_q, c, var, top_n)
             ranks.append(rank)
             times.append(time)
-        
+
         ''' CONVERGENCE METRICS '''
         print("Average number of time steps until convergence: ")
         print(np.mean(times))
@@ -51,24 +53,27 @@ class AbstractAlgo(ABC):
         print("fifth: " + str(fifth*100) + "%")
         print()
 
-
-        ''' INCLUSION METRICS ''' 
+        ''' INCLUSION METRICS '''
         print('Inclusion in Top-5: ')
         c2 = Counter(tuple(x) for x in iter(ranks))
-        first = sum([c2[x] for x in c2 if np.argsort(true_q)[::-1][0] in x[0:5]]) / n_episodes
+        first = sum([c2[x] for x in c2 if np.argsort(
+            true_q)[::-1][0] in x[0:5]]) / n_episodes
         print("first: " + str(first * 100) + "%")
-        second = sum([c2[x] for x in c2 if np.argsort(true_q)[::-1][1] in x[0:5]]) / n_episodes
+        second = sum([c2[x] for x in c2 if np.argsort(
+            true_q)[::-1][1] in x[0:5]]) / n_episodes
         print("second: " + str(second * 100) + "%")
-        third = sum([c2[x] for x in c2 if np.argsort(true_q)[::-1][2] in x[0:5]]) / n_episodes
-        print("third: " + str(third * 100)+ "%")
-        fourth = sum([c2[x] for x in c2 if np.argsort(true_q)[::-1][3] in x[0:5]]) / n_episodes
+        third = sum([c2[x] for x in c2 if np.argsort(
+            true_q)[::-1][2] in x[0:5]]) / n_episodes
+        print("third: " + str(third * 100) + "%")
+        fourth = sum([c2[x] for x in c2 if np.argsort(
+            true_q)[::-1][3] in x[0:5]]) / n_episodes
         print("fourth: " + str(fourth * 100) + "%")
-        fifth = sum([c2[x] for x in c2 if np.argsort(true_q)[::-1][4] in x[0:5]]) / n_episodes
+        fifth = sum([c2[x] for x in c2 if np.argsort(
+            true_q)[::-1][4] in x[0:5]]) / n_episodes
         print("fifth: " + str(fifth * 100) + "%")
-        
-        self.generate_plots()
+
+        self.generate_plots(locals())
 
     @abstractmethod
     def __str__(self):
         pass
-    
