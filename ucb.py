@@ -12,7 +12,7 @@ from AbstractAlgo import AbstractAlgo
 class UCB(AbstractAlgo):
     ''' UCB
     input: q-value per team (Q), visits per team (N), number of teams (n_teams),
-    judge's previous 3 teams (prev3), exploration constant (c), time (t)
+    judge's previous 2 teams (prev2), exploration constant (c), time (t)
     output: a team to visit (curr)`
     '''
 
@@ -20,7 +20,7 @@ class UCB(AbstractAlgo):
         self.c = c
         super().__init__(sim)
 
-    def ucb(self, Q, N, n_teams, prev3, t):
+    def ucb(self, Q, N, n_teams, prev2, t):
         # calculate UCB score for each team
         ucb_scores = []
         for a in range(n_teams):
@@ -32,7 +32,7 @@ class UCB(AbstractAlgo):
         curr = np.argmax(ucb_scores)
         # make sure that curr != prev
         i = 2
-        while curr in prev3:
+        while curr in prev2:
             curr = np.argsort(ucb_scores)[-i]
             i += 1
         return curr
@@ -43,7 +43,7 @@ class UCB(AbstractAlgo):
     output: boolean indicating whether the top_n ranks have converged
     '''
 
-    def update(self, Q, N, curr, prev, winner, t, top_n):
+    def update(self, Q, N, curr, prev, winner, t, top_n, n_comparisons):
         N[curr] += 1  # visit current team
         N[prev] += 1  # visit previous team
         if winner == curr:  # assign R=1 if curr is the winner, else R=0
@@ -53,21 +53,21 @@ class UCB(AbstractAlgo):
         curr_Q = Q[curr]  # get current team's q-value
         prev_Q = Q[prev]  # get previous team's q-value
 
-        last_ranking = rankdata(Q[::-1], method='min')[:top_n]
+        last_ranking = rankdata(Q[::-1], method='min')
 
         # incremental average to update current team's q-value
         Q[curr] = curr_Q + 1/N[curr] * (int(R) - curr_Q)
         # incremental average to update previous team's q-value
         Q[prev] = prev_Q + 1/N[prev] * (int(not R) - prev_Q)
 
-        new_ranking = rankdata(Q[::-1], method='min')[:top_n]
+        new_ranking = rankdata(Q[::-1], method='min')
 
-        if (last_ranking == new_ranking).all() and t > len(N) * math.log2(len(N)):
-            return True
-        else:
-            return False
+        done = (top_n > 0 and (last_ranking[:top_n] == new_ranking[:top_n]).all()) or \
+               (n_comparisons > 0 and t >= n_comparisons)
 
-    def rank_teams(self, top_n):
+        return done
+
+    def rank_teams(self, top_n, n_comparisons):
         # intialize q-values (e.g. q(·)=0 for all teams)
         Q = [0 for _ in range(self.sim.n_teams)]
         # initialize number of visits (e.g. n(·)=0 for all teams)
@@ -80,8 +80,7 @@ class UCB(AbstractAlgo):
         judge_queue = Queue()
         for j in range(self.sim.n_judges):
             judge_queue.put(j)
-            judge_previous[j] = [None, None,
-                                 random.randint(0, self.sim.n_teams-1)]
+            judge_previous[j] = [None, random.randint(0, self.sim.n_teams-1)]
 
         while True:  # WHILE q-values haven't converged
             j = judge_queue.get()
@@ -90,20 +89,20 @@ class UCB(AbstractAlgo):
             judge_current[j] = self.ucb(
                 Q, N, self.sim.n_teams, judge_previous[j], t)
             # simulate the judge's decision
-            winner = self.sim.judge(0, judge_current[j], judge_previous[j][2])
+            winner = self.sim.judge(0, judge_current[j], judge_previous[j][1])
             # update the team's scores
             # update the team's q-values
             done = self.update(
-                Q, N, judge_current[j], judge_previous[j][2], winner, t, top_n)
+                Q, N, judge_current[j], judge_previous[j][1], winner, t, top_n, n_comparisons)
             if done:  # return the sorted list if q-values have converged
-                return np.argsort(Q)[::-1], t
+                rank = rankdata(1-np.array(Q), method='min')-1
+                return rank, t
             judge_previous[j][0] = judge_previous[j][1]
-            judge_previous[j][1] = judge_previous[j][2]
-            judge_previous[j][2] = judge_current[j]
+            judge_previous[j][1] = judge_current[j]
             judge_queue.put(j)  # assign curr to prev
 
     def get_plot_name(self):
         return f'UCB (c={self.c})'
 
     def __str__(self):
-        return "***************** UCB PREV-3 Algorithm *****************"
+        return "***************** UCB PREV-2 Algorithm *****************"
