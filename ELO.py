@@ -48,11 +48,11 @@ class ELO(AbstractAlgo):
         self.K = K
         self.d = d
 
-    def rank_teams(self, top_n):
+    def rank_teams(self, top_n, n_comparisons):
         prev_teams = [i for i in range(self.sim.n_judges)]
         team_scores = [1000 for _ in range(self.sim.n_teams)]
 
-        last_ranking = ([i for i in range(self.sim.n_teams)])[:top_n]
+        last_ranking = ([i for i in range(self.sim.n_teams)])
 
         n = 0
         t = 0
@@ -76,9 +76,14 @@ class ELO(AbstractAlgo):
                 prev_teams[j] = t2
                 n += 1
 
-            new_ranking = (np.argsort(team_scores)[::-1])[:top_n]
-            if (new_ranking == last_ranking).all() and t > self.sim.n_teams * math.log2(self.sim.n_teams):
+            new_ranking = (np.argsort(team_scores)[::-1])
+
+            done = (top_n > 0 and (last_ranking[:top_n] == new_ranking[:top_n]).all()) or \
+                (n_comparisons > 0 and t >= n_comparisons)
+
+            if done:
                 break
+
             last_ranking = [i for i in new_ranking]
 
             t += 1
