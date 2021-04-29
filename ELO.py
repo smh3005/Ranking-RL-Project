@@ -94,7 +94,8 @@ class ELO(AbstractAlgo):
 
             t += 1
 
-        return np.argsort(team_scores)[::-1], t
+        rank = rankdata(-np.array(team_scores), method='min')-1
+        return rank, t
 
     def get_plot_name(self):
         return 'ELO'
