@@ -1,9 +1,8 @@
 # https://www.geeksforgeeks.org/elo-rating-algorithm/
 # Python 3 program for Elo Rating
 import math
-
 import numpy as np
-
+from scipy.stats import rankdata
 from AbstractAlgo import AbstractAlgo
 
 def Probability(rating1, rating2):
@@ -49,7 +48,7 @@ class ELO(AbstractAlgo):
         self.d = d
 
     def rank_teams(self, top_n, n_comparisons):
-        prev_teams = [i for i in range(self.sim.n_judges)]
+        prev_teams = [[i] for i in range(self.sim.n_judges)]
         team_scores = [1000 for _ in range(self.sim.n_teams)]
 
         last_ranking = ([i for i in range(self.sim.n_teams)])
@@ -58,30 +57,37 @@ class ELO(AbstractAlgo):
         t = 0
         while True:
             for j in range(self.sim.n_judges):
-                t1 = prev_teams[j]
+                tp1 = prev_teams[j][0]
+                tp2 = None
+                if len(prev_teams[j]) > 1:
+                    tp2 = prev_teams[j][1]
 
                 t2 = None
                 closest_dif = 9999  # simulated inf
                 for team in range(self.sim.n_teams):
-                    if t1 != team and abs(team_scores[t1] - team_scores[team]) < closest_dif:
-                        closest_dif = abs(team_scores[t1] - team_scores[team])
+                    if team != tp1 and team != tp2 and abs(team_scores[tp1] - team_scores[team]) < closest_dif:
+                        closest_dif = abs(team_scores[tp1] - team_scores[team])
                         t2 = team
 
-                winner = self.sim.judge(j, t1, t2)
-                loser = t2 if winner == t1 else t1
+                winner = self.sim.judge(j, tp1, t2)
+                loser = t2 if winner == tp1 else tp1
 
                 team_scores[winner], team_scores[loser] = EloRating(
                     team_scores[winner], team_scores[loser], self.K, self.d)
 
-                prev_teams[j] = t2
+                if len(prev_teams[j]) == 1:
+                    prev_teams[j].append(tp1)
+                elif len(prev_teams[j]) == 2:
+                    prev_teams[j][1] = tp1
+                else:
+                    raise Exception("prev team history is too long... something's wrong")
+                prev_teams[j][0] = t2
+
                 n += 1
 
-            new_ranking = (np.argsort(team_scores)[::-1])
+            new_ranking = rankdata(team_scores)[::-1]
 
-            done = (top_n > 0 and (last_ranking[:top_n] == new_ranking[:top_n]).all()) or \
-                (n_comparisons > 0 and t >= n_comparisons)
-
-            if done:
+            if (last_ranking == new_ranking).all() and t > self.sim.n_teams * math.log2(self.sim.n_teams):
                 break
 
             last_ranking = [i for i in new_ranking]
