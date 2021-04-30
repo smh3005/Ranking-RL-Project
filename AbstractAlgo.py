@@ -17,6 +17,7 @@ class AbstractAlgo(ABC):
         self._true_order = np.argsort(self.sim.true_q)[::-1]
         self._ncomparisons = []
         self._ranks = []
+        self._inclusions = [] # use for cache
 
     @property
     def n_comparisons(self):
@@ -33,18 +34,22 @@ class AbstractAlgo(ABC):
                     np.tile(self._true_order, (self.n_episodes, 1)))
         return is_equal[:, self._true_order]
 
-    @property
-    def inclusions(self):
+    def inclusions(self, top_k):
+        if self._inclusions == self.n_episodes: # we've already calculated it
+            return self._inclusions
         c2 = Counter(tuple(x) for x in iter(self._ranks))
+        inclusions = []
         for order in self._true_order:
             inclusion = sum(
-                [c2[x] for x in c2 if order in x[0:5]]) / self.n_episodes
-            yield inclusion
+                [c2[x] for x in c2 if order in x[0:top_k]]) / self.n_episodes
+            inclusions.append(inclusion)
+        self._inclusions = inclusions
+        return inclusions
 
     def rbo(self, p):
         rbos = np.empty(self.n_episodes)
         for i, rank in enumerate(self._ranks):
-            rbos[i] = rbo.RankingSimilarity(self._true_order, rank).rbo(p=p)
+            rbos[i] = rbo.RankingSimilarity(self._true_order, np.argsort(rank)).rbo(p=p)
         return rbos.mean()
 
     @abstractmethod
