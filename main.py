@@ -13,15 +13,9 @@ eval_var = 0.001
 sim = JudgingSimulator(true_q, n_judges, opinion_var, eval_var) 
 
 ucb = UCB(sim, c=0.7)
-ucb.run_experiment(n_episodes=20, top_n=5).print_results()
-ucb.rbo(0.5)
-
 egreedy = EpsilonGreedy(sim, epsilon=0.1)
-egreedy.run_experiment(n_episodes=20, top_n=5).print_results().plot('inclusion')
-
 elo = ELO(sim)
-elo.run_experiment(n_episodes=20, top_n=5).print_results().plot('inclusion')
 
-plt.ylim(-0.2, 1.2)
-plt.legend()
-plt.show()
+ucb.run_experiment(n_episodes=1, top_n=5).print_results()#.plot('inclusion')
+egreedy.run_experiment(n_episodes=1, top_n=-1).print_results()#.plot('inclusion')
+elo.run_experiment(n_episodes=1, top_n=-1, n_comparisons=1).print_results()#.plot('inclusion')
