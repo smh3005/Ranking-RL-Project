@@ -87,7 +87,10 @@ class ELO(AbstractAlgo):
 
             new_ranking = rankdata(team_scores)[::-1]
 
-            if (last_ranking == new_ranking).all() and t > self.sim.n_teams * math.log2(self.sim.n_teams):
+            done = (top_n > 0 and (last_ranking[:top_n] == new_ranking[:top_n]).all()) or \
+                   (n_comparisons > 0 and t >= n_comparisons)
+
+            if done:
                 break
 
             last_ranking = [i for i in new_ranking]
