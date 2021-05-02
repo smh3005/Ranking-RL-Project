@@ -19,6 +19,16 @@ class UCB(AbstractAlgo):
     def __init__(self, sim, c):
         self.c = c
         super().__init__(sim)
+    
+    def random_tiebreaker(self, ucb_scores):
+        rank = rankdata(-np.array(ucb_scores), method='min')-1
+        tiebreaker = []
+        for i in range(max(rank)+1):
+            ties = np.where(rank == i)[0]
+            np.random.shuffle(ties)
+            for x in ties:
+                tiebreaker.append(x)
+        return tiebreaker
 
     def ucb(self, Q, N, n_teams, prev2, t):
         # calculate UCB score for each team
@@ -29,11 +39,12 @@ class UCB(AbstractAlgo):
             else:
                 ucb_scores.append(Q[a] + self.c * np.sqrt(np.log(2*t)/N[a]))
         # choose the team with the highest UCB score
-        curr = np.argmax(ucb_scores)
+        tiebreaker = self.random_tiebreaker(ucb_scores)
+        curr = tiebreaker[0]
         # make sure that curr != prev
-        i = 2
+        i = 1
         while curr in prev2:
-            curr = np.argsort(ucb_scores)[-i]
+            curr = tiebreaker[i]
             i += 1
         return curr
 
@@ -53,17 +64,17 @@ class UCB(AbstractAlgo):
         curr_Q = Q[curr]  # get current team's q-value
         prev_Q = Q[prev]  # get previous team's q-value
 
-        last_ranking = rankdata(Q[::-1], method='min')
+        last_ranking = rankdata(-np.array(Q), method='min')-1
 
         # incremental average to update current team's q-value
         Q[curr] = curr_Q + 1/N[curr] * (int(R) - curr_Q)
         # incremental average to update previous team's q-value
         Q[prev] = prev_Q + 1/N[prev] * (int(not R) - prev_Q)
 
-        new_ranking = rankdata(Q[::-1], method='min')
+        new_ranking = rankdata(-np.array(Q), method='min')-1
 
         done = (top_n > 0 and (last_ranking[:top_n] == new_ranking[:top_n]).all()) or \
-               (n_comparisons > 0 and t >= n_comparisons)
+            (n_comparisons > 0 and t >= n_comparisons)
 
         return done
 
@@ -89,11 +100,11 @@ class UCB(AbstractAlgo):
             judge_current[j] = self.ucb(
                 Q, N, self.sim.n_teams, judge_previous[j], t)
             # simulate the judge's decision
-            winner = self.sim.judge(0, judge_current[j], judge_previous[j][1])
-            # update the team's scores
+            winner = self.sim.judge(j, judge_current[j], judge_previous[j][1])
             # update the team's q-values
             done = self.update(
                 Q, N, judge_current[j], judge_previous[j][1], winner, t, top_n, n_comparisons)
+
             if done:  # return the sorted list if q-values have converged
                 rank = rankdata(1-np.array(Q), method='min')-1
                 return rank, t

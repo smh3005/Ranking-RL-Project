@@ -24,14 +24,24 @@ class EpsilonGreedy(AbstractAlgo):
     def epsilon(self):
         return self._epsilon
 
+    def random_tiebreaker(self, scores):
+        rank = rankdata(-np.array(scores), method='min')-1
+        tiebreaker = []
+        for i in range(max(rank)+1):
+            ties = np.where(rank == i)[0]
+            np.random.shuffle(ties)
+            for x in ties:
+                tiebreaker.append(x)
+        return tiebreaker
+
 
     def egreedy(self, Q, n_teams, prev2):
         if random.random() > self.epsilon:  # choose highest scoring team with probability 1-epsilon
-            curr = np.random.choice(np.flatnonzero(
-                np.array(Q) == np.array(Q).max()))
-            i = 2
+            tiebreaker = self.random_tiebreaker(Q)
+            curr = tiebreaker[0]
+            i = 1
             while curr in prev2:
-                curr = np.argsort(Q)[-i]
+                curr = tiebreaker[i]
                 i += 1
         else:  # choose random team with proability epsilon
             curr = random.randint(0, n_teams-1)
@@ -71,7 +81,7 @@ class EpsilonGreedy(AbstractAlgo):
         new_ranking = rankdata(Q[::-1], method='min')
 
         done = (top_n > 0 and (last_ranking[:top_n] == new_ranking[:top_n]).all()) or \
-               (n_comparisons > 0 and t >= n_comparisons)
+            (n_comparisons > 0 and t >= n_comparisons)
 
         return done
 
@@ -97,7 +107,7 @@ class EpsilonGreedy(AbstractAlgo):
             judge_current[j] = self.egreedy(
                 Q, self.sim.n_teams, judge_previous[j])
             # simulate the judge's decision
-            winner = self.sim.judge(0, judge_current[j], judge_previous[j][1])
+            winner = self.sim.judge(j, judge_current[j], judge_previous[j][1])
             # update the team's q-values
             done = self.update(
                 Q, N, judge_current[j], judge_previous[j][1], winner, t, top_n, n_comparisons)

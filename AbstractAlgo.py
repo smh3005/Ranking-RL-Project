@@ -41,7 +41,7 @@ class AbstractAlgo(ABC):
         inclusions = []
         for order in self._true_order:
             inclusion = sum(
-                [c2[x] for x in c2 if order in x[0:top_k]]) / self.n_episodes
+                [c2[x] for x in c2 if x[order] <= 5]) / self.n_episodes
             inclusions.append(inclusion)
         self._inclusions = inclusions
         return inclusions
@@ -97,9 +97,11 @@ class AbstractAlgo(ABC):
         print('Accuracy: ')
         for name, accuracy in zip(ordinal_names[:nplaces], self.accuracies.mean(axis=0)):
             print(f"{name}: {int(round(accuracy*100))}%")
+        
+        print()
 
         print('Inclusion in Top-5: ')
-        for name, inclusion in zip(ordinal_names[:nplaces], self.inclusions):
+        for name, inclusion in zip(ordinal_names[:nplaces], self.inclusions(5)):
             print(f"{name}: {int(round(inclusion*100))}%")
 
         return self
